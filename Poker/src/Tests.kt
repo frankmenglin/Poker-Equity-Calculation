@@ -146,9 +146,52 @@ fun testHoldemHandEquity() {
     println("testHoldemHandEquity success")
 }
 
+fun testEqualHandEquity() {
+    val JackTenClubs = HoldemStartingHand(listOf(Card("J", "c"), Card("T", "c")))
+    val JackTenHearts = HoldemStartingHand(listOf(Card("J", "h"), Card("T", "h")))
+
+    var JTc_vs_JTh = estimateEquity(JackTenClubs, JackTenHearts, 2500, printTime = true)
+    println("Equity of JcTc vs JhTh after 2500 Monte Carlo trials are")
+    println(JTc_vs_JTh)
+
+    JTc_vs_JTh = estimateEquity(JackTenClubs, JackTenHearts, 25000, printTime = true)
+    println("Equity of JcTc vs JhTh after 25000 Monte Carlo trials are")
+    println(JTc_vs_JTh)
+
+    println("testEqualHandEquity success")
+}
+
+fun testEquityVsRandom() {
+    val pocketAces = HoldemStartingHand(listOf(Card("A", "h"), Card("A", "d")))
+
+    var acesAgainstTwo = estimateEquityVsRandom(pocketAces,2, 400, printTime = true)
+    println("Equity of pocket Aces vs. 2 random hands using 400 trial is")
+    println(acesAgainstTwo)
+
+    acesAgainstTwo = estimateEquityVsRandom(pocketAces,2, 1600, printTime = true)
+    println("Equity of pocket Aces vs. 2 random hands using 1600 trial is")
+    println(acesAgainstTwo)
+
+    acesAgainstTwo = estimateEquityVsRandom(pocketAces,2, 6400, printTime = true)
+    println("Equity of pocket Aces vs. 2 random hands using 6400 trial is")
+    println(acesAgainstTwo)
+
+//    acesAgainstTwo = estimateEquityVsRandom(pocketAces,2, 25600, printTime = true)
+//    println("Equity of pocket Aces vs. 2 random hands using 25600 trial is")
+//    println(acesAgainstTwo)
+
+    //acesAgainstTwo = estimateEquityVsRandom(pocketAces,2, 102400, printTime = true)
+    //println("Equity of pocket Aces vs. 2 random hands using 102400 trial is")
+    //println(acesAgainstTwo)
+
+    println("testEquityVsRandom success")
+}
+
 fun main() {
     testCardConstruction()
     testHandTypeClassification()
     testHoldemHand()
     testHoldemHandEquity()
+    testEqualHandEquity()
+    testEquityVsRandom()
 }

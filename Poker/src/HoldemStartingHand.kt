@@ -53,6 +53,7 @@ fun <T> List<T>.combinations(k: Int): List<List<T>> {
     return combinations
 }
 
+//Hand vs. Hand Equity
 fun estimateEquity(
     hand1: HoldemStartingHand,
     hand2: HoldemStartingHand,
@@ -88,6 +89,61 @@ fun estimateEquity(
 
     return Pair(wins1 / trials, wins2 / trials)
 }
+
+// Equity vs. Random Hands
+fun estimateEquityVsRandom(
+    hand1: HoldemStartingHand,
+    numOfOpps: Int = 1,
+    trials: Int = 40_000,
+    printTime: Boolean = false
+): Double {
+    val deck = buildDeck().filterNot { it in hand1.getCards() }
+    var winTrials = 0.0
+
+    // Measure the simulation time
+    val elapsedTime = measureTimeMillis {
+        repeat(trials) {
+            val shuffledDeck = deck.shuffled()
+            val communityBoard = shuffledDeck.take(5)
+            val bestHand1 = getBestFiveCardsHand(communityBoard, hand1)
+            val oppHands = List(numOfOpps) {
+                HoldemStartingHand(shuffledDeck.drop(5 + it * 2).take(2))
+            }
+
+            val bestHandsOpps = oppHands.map { getBestFiveCardsHand(communityBoard, it) }
+            var ties = 0.0
+            var wins = 0.0
+
+            bestHandsOpps.forEach { oppHand ->
+                val result = bestHand1.equityAgainst(oppHand)
+                if (result == 1.0) {
+                    wins += 1
+                } else if (result == 0.5) {
+                    ties += 1
+                }
+            }
+
+            val totalOpponents = bestHandsOpps.size.toDouble()
+            // Calculate proportion of the trial that counts as a win for Hand 1
+            // Only when no lose we have non-zero score, as (fraction of) pot only awards best hand(s).
+            val scoreForThisTrial = if (ties + wins == totalOpponents) {
+                1.0 / (1.0 + ties)
+            } else {
+                0.0
+            }
+
+            winTrials += scoreForThisTrial // Aggregate the score for this trial to the total wins
+        }
+    }
+
+    // Conditionally print the time
+    if (printTime) {
+        println("Monte Carlo simulation took $elapsedTime ms")
+    }
+
+    return winTrials / trials
+}
+
 
 fun buildDeck(): List<Card> {
     val ranks = listOf("A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2")
